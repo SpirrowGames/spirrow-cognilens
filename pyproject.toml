@@ -1,0 +1,78 @@
+[project]
+name = "spirrow-cognilens"
+version = "0.1.0"
+description = "Context compression and summarization MCP server for optimizing AI context windows"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Spirrow Games", email = "dev@spirrow.games" }
+]
+keywords = [
+    "mcp",
+    "model-context-protocol",
+    "compression",
+    "summarization",
+    "llm",
+    "ai",
+    "context-window",
+    "claude",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: General",
+]
+dependencies = [
+    "fastmcp>=2.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "pyyaml>=6.0",
+    "openai>=1.0.0",
+    "tiktoken>=0.5.0",
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/SpirrowGames/spirrow-cognilens"
+Documentation = "https://github.com/SpirrowGames/spirrow-cognilens#readme"
+Repository = "https://github.com/SpirrowGames/spirrow-cognilens.git"
+Issues = "https://github.com/SpirrowGames/spirrow-cognilens/issues"
+
+[project.scripts]
+spirrow-cognilens = "cognilens.server:main"
+cognilens = "cognilens.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cognilens"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true

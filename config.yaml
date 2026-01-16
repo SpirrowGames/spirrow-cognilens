@@ -1,0 +1,19 @@
+server:
+  name: "Spirrow-Cognilens"
+  host: "0.0.0.0"
+  port: 8003
+
+llm:
+  provider: "openai"  # mock, openai, lexora
+  model: "gpt-4o-mini"
+  timeout: 30
+  max_retries: 3
+
+compression:
+  default_ratio: 0.3
+  min_ratio: 0.1
+  max_ratio: 0.9
+
+summarization:
+  default_max_tokens: 500
+  default_style: "concise"
