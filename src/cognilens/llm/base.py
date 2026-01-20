@@ -28,8 +28,17 @@ class LLMClient(ABC):
         system_prompt: Optional[str] = None,
         max_tokens: Optional[int] = None,
         temperature: float = 0.7,
+        model: Optional[str] = None,
     ) -> LLMResponse:
-        """Generate text from prompt."""
+        """Generate text from prompt.
+
+        Args:
+            prompt: The input prompt
+            system_prompt: Optional system prompt
+            max_tokens: Maximum tokens to generate
+            temperature: Sampling temperature
+            model: Optional model override (for smart selection)
+        """
         ...
 
     @abstractmethod

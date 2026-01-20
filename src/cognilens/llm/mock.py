@@ -21,6 +21,7 @@ class MockLLMClient(LLMClient):
         system_prompt: Optional[str] = None,
         max_tokens: Optional[int] = None,
         temperature: float = 0.7,
+        model: Optional[str] = None,
     ) -> LLMResponse:
         """Generate mock response by extracting key sentences."""
         self._call_count += 1
@@ -38,7 +39,7 @@ class MockLLMClient(LLMClient):
 
         return LLMResponse(
             content=mock_summary,
-            model="mock-model",
+            model=model or "mock-model",
             tokens_used=len(mock_summary.split()),
             finish_reason="stop",
         )

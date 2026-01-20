@@ -19,6 +19,24 @@ class LLMProvider(str, Enum):
     LEXORA = "lexora"
 
 
+class SmartModelSelectionConfig(BaseModel):
+    """Smart model selection configuration."""
+
+    enabled: bool = False
+    cache_ttl_seconds: int = 300
+    classify_tasks: bool = True
+    fallback_to_default: bool = True
+    strategy_capability_map: dict[str, str] = Field(
+        default_factory=lambda: {
+            "concise": "summarization",
+            "detailed": "summarization",
+            "bullet": "summarization",
+            "code_aware": "code",
+            "diff": "reasoning",
+        }
+    )
+
+
 class LLMConfig(BaseModel):
     """LLM client configuration."""
 
@@ -28,6 +46,9 @@ class LLMConfig(BaseModel):
     base_url: Optional[str] = None
     timeout: int = 30
     max_retries: int = 3
+    smart_selection: SmartModelSelectionConfig = Field(
+        default_factory=SmartModelSelectionConfig
+    )
 
 
 class CompressionConfig(BaseModel):

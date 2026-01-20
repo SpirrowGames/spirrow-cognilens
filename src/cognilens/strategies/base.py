@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from cognilens.core.types import CompressionRequest, CompressionResult
 from cognilens.llm.base import LLMClient
@@ -27,8 +28,15 @@ class CompressionStrategy(ABC):
         ...
 
     @abstractmethod
-    async def compress(self, request: CompressionRequest) -> CompressionResult:
-        """Execute the compression strategy."""
+    async def compress(
+        self, request: CompressionRequest, *, model: Optional[str] = None
+    ) -> CompressionResult:
+        """Execute the compression strategy.
+
+        Args:
+            request: Compression request with text and parameters
+            model: Optional model override for smart selection
+        """
         ...
 
     async def _calculate_quality_score(

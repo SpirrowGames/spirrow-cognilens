@@ -1,13 +1,33 @@
+# Cognilens Configuration for AIサーバー
+
 server:
   name: "Spirrow-Cognilens"
   host: "0.0.0.0"
-  port: 8003
+  port: 8111
 
 llm:
-  provider: "openai"  # mock, openai, lexora
-  model: "gpt-4o-mini"
+  provider: "openai"  # OpenAI互換API (Lexora経由)
+  base_url: "http://localhost:8110/v1"
+  api_key: "dummy"  # Lexoraは認証不要
+  model: "Qwen2.5-1.5B"  # フォールバック用デフォルト
   timeout: 30
   max_retries: 3
+
+  # Smart model selection (opt-in)
+  # Enable to use Lexora's /v1/models/capabilities and /v1/classify-task APIs
+  # for automatic model selection based on task type
+  smart_selection:
+    enabled: false  # Set to true to enable smart model selection
+    cache_ttl_seconds: 300  # Capabilities cache TTL (5 minutes)
+    classify_tasks: true  # Use /v1/classify-task API for task classification
+    fallback_to_default: true  # Use default model if selection fails
+    # Map compression strategies to required capabilities
+    strategy_capability_map:
+      concise: "summarization"
+      detailed: "summarization"
+      bullet: "summarization"
+      code_aware: "code"
+      diff: "reasoning"
 
 compression:
   default_ratio: 0.3

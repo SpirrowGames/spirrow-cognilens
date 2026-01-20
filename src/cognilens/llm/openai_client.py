@@ -37,15 +37,17 @@ class OpenAIClient(LLMClient):
         system_prompt: Optional[str] = None,
         max_tokens: Optional[int] = None,
         temperature: float = 0.7,
+        model: Optional[str] = None,
     ) -> LLMResponse:
         """Generate text using OpenAI API."""
+        use_model = model or self._model
         messages: list[dict[str, str]] = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
         response = await self._client.chat.completions.create(
-            model=self._model,
+            model=use_model,
             messages=messages,  # type: ignore
             max_tokens=max_tokens,
             temperature=temperature,

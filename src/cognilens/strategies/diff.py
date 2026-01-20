@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from cognilens.core.types import CompressionRequest, CompressionResult, DiffInput
 from cognilens.prompts.builder import PromptBuilder
 
@@ -19,7 +21,9 @@ class DiffStrategy(CompressionStrategy):
     def description(self) -> str:
         return "Diff-focused - highlights additions, deletions, and changes"
 
-    async def compress(self, request: CompressionRequest) -> CompressionResult:
+    async def compress(
+        self, request: CompressionRequest, *, model: Optional[str] = None
+    ) -> CompressionResult:
         """Compress by summarizing differences between two texts."""
         # DiffStrategy expects diff_input in metadata
         diff_input = request.metadata.get("diff_input")
@@ -38,6 +42,7 @@ class DiffStrategy(CompressionStrategy):
             system_prompt=PromptBuilder.get_system_prompt(),
             max_tokens=request.target_tokens or 500,
             temperature=0.3,
+            model=model,
         )
 
         compressed_tokens = await self.llm.count_tokens(response.content)

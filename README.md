@@ -14,6 +14,7 @@ A magic lens that extracts only the essence from large amounts of information:
 - Saves Claude Code's context window
 - Compresses without losing important information
 - Optimal summarization strategies for different use cases
+- **Smart model selection** via Lexora API integration
 
 ## Installation
 
@@ -75,6 +76,8 @@ Styles:
 - concise: 80% compression - for overviews
 - detailed: 50% compression - for implementation reference
 - bullet: Structured bullet points
+- code_aware: Preserves code structure, compresses explanations
+- diff: Highlights changes between versions
 ```
 
 ### 2. `compress_context`
@@ -102,6 +105,48 @@ Apply progressive compression through multiple stages.
 
 For very large documents, compress in stages to maintain quality.
 
+## Smart Model Selection
+
+Cognilens integrates with Lexora's new APIs to automatically select the optimal model for each compression task.
+
+### Features
+
+- **Automatic model selection**: Chooses the best model based on task type
+- **Capability-based matching**: Maps compression strategies to model capabilities
+- **4-level fallback**: Classification API → Capability match → Heuristics → Default model
+- **TTL-based caching**: Model capabilities cached for performance (default: 5 minutes)
+
+### Strategy to Capability Mapping
+
+| Strategy | Capability | Use Case |
+|----------|------------|----------|
+| `concise` | `summarization` | Overview, task lists |
+| `detailed` | `summarization` | Implementation reference, API specs |
+| `bullet` | `summarization` | Structured key points |
+| `code_aware` | `code` | Code with explanations |
+| `diff` | `reasoning` | Change analysis |
+
+### Enabling Smart Selection
+
+```yaml
+llm:
+  provider: "openai"
+  base_url: "http://localhost:8110/v1"
+  model: "Qwen2.5-1.5B"  # Fallback default
+
+  smart_selection:
+    enabled: true
+    cache_ttl_seconds: 300
+    classify_tasks: true
+    fallback_to_default: true
+```
+
+Or via environment variables:
+
+```bash
+COGNILENS_LLM__SMART_SELECTION__ENABLED=true
+```
+
 ## Configuration
 
 ### Environment Variables
@@ -111,6 +156,9 @@ For very large documents, compress in stages to maintain quality.
 | `COGNILENS_LLM__PROVIDER` | LLM provider (mock/openai/lexora) | `openai` |
 | `COGNILENS_LLM__API_KEY` | API key for LLM provider | - |
 | `COGNILENS_LLM__MODEL` | Model to use | `gpt-4o-mini` |
+| `COGNILENS_LLM__BASE_URL` | Custom API endpoint | - |
+| `COGNILENS_LLM__SMART_SELECTION__ENABLED` | Enable smart model selection | `false` |
+| `COGNILENS_LLM__SMART_SELECTION__CACHE_TTL_SECONDS` | Capabilities cache TTL | `300` |
 | `COGNILENS_SERVER__PORT` | Server port | `8003` |
 
 ### Config File
@@ -124,8 +172,21 @@ server:
 
 llm:
   provider: "openai"
+  base_url: "http://localhost:8110/v1"
   model: "gpt-4o-mini"
   timeout: 30
+
+  smart_selection:
+    enabled: false
+    cache_ttl_seconds: 300
+    classify_tasks: true
+    fallback_to_default: true
+    strategy_capability_map:
+      concise: "summarization"
+      detailed: "summarization"
+      bullet: "summarization"
+      code_aware: "code"
+      diff: "reasoning"
 
 compression:
   default_ratio: 0.3
@@ -138,17 +199,17 @@ compression:
 git clone https://github.com/SpirrowGames/spirrow-cognilens.git
 cd spirrow-cognilens
 
-# Install with dev dependencies
-pip install -e ".[dev]"
+# Install with uv
+uv sync
 
 # Run tests
-pytest tests/ -v
+uv run pytest tests/ -v
 
 # Run linting
-ruff check src/ tests/
+uv run ruff check src/ tests/
 
 # Run type checking
-mypy src/
+uv run mypy src/
 ```
 
 ## Architecture
@@ -165,14 +226,18 @@ mypy src/
 │                          │                                  │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │ Compression Engine                                   │   │
+│  │ + ModelSelector (smart model selection)             │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                          │                                  │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │ Strategies: Concise | Detailed | Bullet | CodeAware │   │
+│  │             Diff                                     │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                          │                                  │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │ LLM Client: OpenAI | Lexora | Mock                  │   │
+│  │ + Lexora APIs: /v1/models/capabilities              │   │
+│  │                /v1/classify-task                    │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -183,6 +248,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- [GitHub Repository](https://github.com/SpirrowGames/spirrow-cognilens)
-- [Issue Tracker](https://github.com/SpirrowGames/spirrow-cognilens/issues)
+- [GitHub Repository](https://github.com/anthropics/spirrow-cognilens)
+- [Issue Tracker](https://github.com/anthropics/spirrow-cognilens/issues)
 - [MCP Specification](https://modelcontextprotocol.io/)
