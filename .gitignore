@@ -58,6 +58,7 @@ build/
 # Local config
 config.local.yaml
 .env.local
+start.sh
 
 # OS
 .DS_Store
