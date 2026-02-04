@@ -1,5 +1,7 @@
 # Spirrow-Cognilens
 
+**[日本語](README_ja.md)**
+
 Context compression and summarization MCP server for optimizing AI context windows.
 
 [![PyPI version](https://badge.fury.io/py/spirrow-cognilens.svg)](https://badge.fury.io/py/spirrow-cognilens)
@@ -248,6 +250,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Links
 
-- [GitHub Repository](https://github.com/anthropics/spirrow-cognilens)
-- [Issue Tracker](https://github.com/anthropics/spirrow-cognilens/issues)
+- [GitHub Repository](https://github.com/SpirrowGames/spirrow-cognilens)
+- [Issue Tracker](https://github.com/SpirrowGames/spirrow-cognilens/issues)
 - [MCP Specification](https://modelcontextprotocol.io/)
