@@ -174,7 +174,7 @@ class CompressionEngine:
         response = await self.llm.generate(
             prompt,
             system_prompt=PromptBuilder.get_system_prompt(),
-            max_tokens=int(original_tokens * 0.4),
+            max_tokens=max(int(original_tokens * 0.4), 1),
             temperature=0.4,
             model=model_selection.model_id if model_selection else None,
         )
@@ -220,7 +220,7 @@ class CompressionEngine:
         response = await self.llm.generate(
             prompt,
             system_prompt=PromptBuilder.get_system_prompt(),
-            max_tokens=int(original_tokens * 0.3),
+            max_tokens=max(int(original_tokens * 0.3), 1),
             temperature=0.5,
             model=model_selection.model_id if model_selection else None,
         )
@@ -304,7 +304,7 @@ class CompressionEngine:
             )
 
             original_tokens = await self.llm.count_tokens(current_text)
-            target_tokens = int(original_tokens * stage.target_ratio)
+            target_tokens = max(int(original_tokens * stage.target_ratio), 1)
 
             # Select model for this stage (use concise style)
             model_selection = await self._select_model(
