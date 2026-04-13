@@ -9,7 +9,7 @@ llm:
   provider: "openai"  # OpenAI互換API (Lexora経由)
   base_url: "http://localhost:8110/v1"
   api_key: "dummy"  # Lexoraは認証不要
-  model: "Qwen2.5-1.5B"  # フォールバック用デフォルト
+  model: "light"  # Lexoraティア名（軽量タスク向け）
   timeout: 30
   max_retries: 3
 
