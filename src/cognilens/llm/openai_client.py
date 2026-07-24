@@ -46,6 +46,21 @@ class OpenAIClient(LLMClient):
             messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": prompt})
 
+        # Clamp requested output tokens so that input + output never exceeds the
+        # model's context window. Callers compute max_tokens from the desired
+        # summary size alone and ignore the input size, which makes the backend
+        # reject the request (HTTP 400) once input + max_tokens > context window.
+        if max_tokens is not None:
+            input_tokens = len(self._encoding.encode(prompt))
+            if system_prompt:
+                input_tokens += len(self._encoding.encode(system_prompt))
+            available = (
+                self.config.context_window
+                - input_tokens
+                - self.config.output_safety_margin
+            )
+            max_tokens = max(1, min(max_tokens, available))
+
         response = await self._client.chat.completions.create(
             model=use_model,
             messages=messages,  # type: ignore

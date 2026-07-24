@@ -46,6 +46,13 @@ class LLMConfig(BaseModel):
     base_url: Optional[str] = None
     timeout: int = 30
     max_retries: int = 3
+    # Model context window (input + output). Used to clamp requested output
+    # tokens so that input_tokens + max_tokens never exceeds the model limit.
+    context_window: int = 8192
+    # Safety margin subtracted from the available output budget to absorb
+    # chat-template overhead and tokenizer discrepancies between our local
+    # token counter and the serving backend.
+    output_safety_margin: int = 256
     smart_selection: SmartModelSelectionConfig = Field(
         default_factory=SmartModelSelectionConfig
     )
