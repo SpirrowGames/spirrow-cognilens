@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 """Unit tests for LLM clients."""
 
 import pytest
@@ -82,7 +84,7 @@ class _CaptureCompletions:
 
         class _Resp:
             model = "test"
-            choices = [_Choice()]
+            choices: ClassVar[list] = [_Choice()]
             usage = _Usage()
 
         return _Resp()

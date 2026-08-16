@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from cognilens.core.compressor import CompressionEngine
 
 
 async def unify_summaries(
-    documents: list[dict],
+    documents: list[dict[str, Any]],
     purpose: str,
-) -> dict:
+) -> dict[str, Any]:
     """Unify multiple documents into a single coherent summary.
 
     Args:

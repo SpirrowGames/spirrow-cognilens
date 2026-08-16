@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from cognilens.core.types import CompressionRequest, CompressionResult
 from cognilens.prompts.builder import PromptBuilder
 
@@ -22,7 +20,7 @@ class ConciseStrategy(CompressionStrategy):
         return "Maximum compression (80%) - overview and task lists"
 
     async def compress(
-        self, request: CompressionRequest, *, model: Optional[str] = None
+        self, request: CompressionRequest, *, model: str | None = None
     ) -> CompressionResult:
         """Compress text to concise summary."""
         original_tokens = await self.llm.count_tokens(request.text)

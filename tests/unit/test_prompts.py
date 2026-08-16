@@ -1,6 +1,5 @@
 """Unit tests for prompt templates and builder."""
 
-import pytest
 
 from cognilens.core.types import CompressionStyle, DiffInput, Document, ProgressiveStage
 from cognilens.prompts.builder import PromptBuilder

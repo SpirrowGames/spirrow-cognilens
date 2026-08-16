@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -14,7 +13,7 @@ class LLMResponse(BaseModel):
     content: str
     model: str
     tokens_used: int
-    finish_reason: Optional[str] = None
+    finish_reason: str | None = None
 
 
 class LLMClient(ABC):
@@ -25,10 +24,10 @@ class LLMClient(ABC):
         self,
         prompt: str,
         *,
-        system_prompt: Optional[str] = None,
-        max_tokens: Optional[int] = None,
+        system_prompt: str | None = None,
+        max_tokens: int | None = None,
         temperature: float = 0.7,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> LLMResponse:
         """Generate text from prompt.
 

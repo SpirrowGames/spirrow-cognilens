@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from cognilens.core.types import CompressionRequest, CompressionResult, CompressionStyle
 from cognilens.prompts.builder import PromptBuilder
 
@@ -22,7 +20,7 @@ class BulletStrategy(CompressionStrategy):
         return "Bullet point format - structured key points"
 
     async def compress(
-        self, request: CompressionRequest, *, model: Optional[str] = None
+        self, request: CompressionRequest, *, model: str | None = None
     ) -> CompressionResult:
         """Compress text to bullet point format."""
         original_tokens = await self.llm.count_tokens(request.text)

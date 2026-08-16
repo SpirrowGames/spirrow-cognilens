@@ -12,10 +12,10 @@ from .types import (
 
 __all__ = [
     "CompressionEngine",
-    "CompressionStyle",
     "CompressionRequest",
     "CompressionResult",
-    "Document",
+    "CompressionStyle",
     "DiffInput",
+    "Document",
     "ProgressiveStage",
 ]

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Type
-
 from cognilens.core.types import CompressionStyle
 from cognilens.llm.base import LLMClient
 
@@ -14,7 +12,7 @@ from .concise import ConciseStrategy
 from .detailed import DetailedStrategy
 from .diff import DiffStrategy
 
-STRATEGY_REGISTRY: dict[CompressionStyle, Type[CompressionStrategy]] = {
+STRATEGY_REGISTRY: dict[CompressionStyle, type[CompressionStrategy]] = {
     CompressionStyle.CONCISE: ConciseStrategy,
     CompressionStyle.DETAILED: DetailedStrategy,
     CompressionStyle.BULLET: BulletStrategy,
@@ -32,12 +30,12 @@ def get_strategy(style: CompressionStyle, llm_client: LLMClient) -> CompressionS
 
 
 __all__ = [
+    "STRATEGY_REGISTRY",
+    "BulletStrategy",
+    "CodeAwareStrategy",
     "CompressionStrategy",
     "ConciseStrategy",
     "DetailedStrategy",
-    "BulletStrategy",
-    "CodeAwareStrategy",
     "DiffStrategy",
     "get_strategy",
-    "STRATEGY_REGISTRY",
 ]

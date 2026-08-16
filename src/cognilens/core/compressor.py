@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any
 
 from cognilens.config import get_settings
 from cognilens.llm import LLMClient, create_llm_client
@@ -26,8 +26,8 @@ class CompressionEngine:
 
     def __init__(
         self,
-        llm_client: Optional[LLMClient] = None,
-        model_selector: Optional[ModelSelector] = None,
+        llm_client: LLMClient | None = None,
+        model_selector: ModelSelector | None = None,
     ) -> None:
         settings = get_settings()
 
@@ -48,8 +48,8 @@ class CompressionEngine:
     async def _select_model(
         self,
         style: CompressionStyle,
-        content_preview: Optional[str] = None,
-    ) -> Optional[ModelSelection]:
+        content_preview: str | None = None,
+    ) -> ModelSelection | None:
         """Select optimal model for the compression task.
 
         Args:
@@ -198,7 +198,7 @@ class CompressionEngine:
 
     async def unify_summaries(
         self,
-        documents: list[dict],
+        documents: list[dict[str, Any]],
         purpose: str,
     ) -> CompressionResult:
         """Unify multiple documents into single summary."""
@@ -286,7 +286,7 @@ class CompressionEngine:
     async def progressive_compress(
         self,
         text: str,
-        stages: list[dict],
+        stages: list[dict[str, Any]],
     ) -> list[CompressionResult]:
         """Apply progressive compression through multiple stages."""
         results: list[CompressionResult] = []

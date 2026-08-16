@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from cognilens.core.compressor import CompressionEngine
 
 
 async def progressive_compress(
     text: str,
-    stages: list[dict],
-) -> dict:
+    stages: list[dict[str, Any]],
+) -> dict[str, Any]:
     """Apply progressive compression through multiple stages.
 
     Args:

@@ -2,7 +2,7 @@
 
 import pytest
 
-from cognilens.config import LLMConfig, LLMProvider, Settings, reset_settings
+from cognilens.config import Settings, reset_settings
 from cognilens.tools.compress import compress_context
 from cognilens.tools.diff import summarize_diff
 from cognilens.tools.extract import extract_essence

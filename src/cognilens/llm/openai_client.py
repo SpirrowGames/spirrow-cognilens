@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 import tiktoken
 from openai import AsyncOpenAI
 
@@ -34,10 +32,10 @@ class OpenAIClient(LLMClient):
         self,
         prompt: str,
         *,
-        system_prompt: Optional[str] = None,
-        max_tokens: Optional[int] = None,
+        system_prompt: str | None = None,
+        max_tokens: int | None = None,
         temperature: float = 0.7,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> LLMResponse:
         """Generate text using OpenAI API."""
         use_model = model or self._model
@@ -85,5 +83,6 @@ class OpenAIClient(LLMClient):
         try:
             await self._client.models.list()
             return True
-        except Exception:
+        except Exception:  # noqa: BLE001
+            # A health check that raises is a worse health check.
             return False

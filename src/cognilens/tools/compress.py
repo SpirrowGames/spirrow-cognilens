@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from cognilens.core.compressor import CompressionEngine
 
 
@@ -9,7 +11,7 @@ async def compress_context(
     full_context: str,
     task_description: str,
     target_tokens: int = 500,
-) -> dict:
+) -> dict[str, Any]:
     """Compress context for specific task execution.
 
     Args:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class CompressionStyle(str, Enum):
@@ -23,10 +23,10 @@ class CompressionRequest:
 
     text: str
     style: CompressionStyle = CompressionStyle.CONCISE
-    target_tokens: Optional[int] = None
-    target_ratio: Optional[float] = None
+    target_tokens: int | None = None
+    target_ratio: float | None = None
     preserve: list[str] = field(default_factory=list)
-    context: Optional[str] = None
+    context: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -63,7 +63,7 @@ class DiffInput:
 
     before: str
     after: str
-    focus: Optional[str] = None
+    focus: str | None = None
 
 
 @dataclass
