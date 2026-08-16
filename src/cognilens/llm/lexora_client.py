@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any
 
 import httpx
 
 from cognilens.config import LLMConfig
 
 from .base import LLMClient, LLMResponse
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -20,7 +23,7 @@ class ModelCapability:
     model_id: str
     capabilities: list[str]
     context_length: int = 4096
-    metadata: dict = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict[str, Any])
 
 
 @dataclass
@@ -35,7 +38,7 @@ class ModelCapabilitiesCache:
         """Check if cache has expired."""
         return time.time() - self.fetched_at > self.ttl_seconds
 
-    def find_by_capability(self, capability: str) -> Optional[str]:
+    def find_by_capability(self, capability: str) -> str | None:
         """Find first model with the specified capability."""
         for model in self.models:
             if capability in model.capabilities:
@@ -50,7 +53,7 @@ class ClassificationResult:
     task_type: str
     recommended_capability: str
     confidence: float
-    recommended_model: Optional[str] = None
+    recommended_model: str | None = None
 
 
 class LexoraClient(LLMClient):
@@ -64,17 +67,17 @@ class LexoraClient(LLMClient):
     def __init__(self, config: LLMConfig) -> None:
         self.config = config
         self._base_url = config.base_url or "http://localhost:8001"
-        self._capabilities_cache: Optional[ModelCapabilitiesCache] = None
+        self._capabilities_cache: ModelCapabilitiesCache | None = None
         self._cache_ttl = config.smart_selection.cache_ttl_seconds
 
     async def generate(
         self,
         prompt: str,
         *,
-        system_prompt: Optional[str] = None,
-        max_tokens: Optional[int] = None,
+        system_prompt: str | None = None,
+        max_tokens: int | None = None,
         temperature: float = 0.7,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> LLMResponse:
         """Generate text using Lexora API.
 
@@ -117,9 +120,14 @@ class LexoraClient(LLMClient):
                     json={"text": text},
                 )
                 if response.status_code == 200:
-                    return response.json().get("count", len(text) // 4)
-        except Exception:
-            pass
+                    # int(): the JSON body is untyped and the caller is promised an int.
+                    return int(response.json().get("count", len(text) // 4))
+        except Exception as exc:  # noqa: BLE001 - deliberately broad, see below
+            # This is a token *estimate*: every failure mode has the same right
+            # answer, which is to fall back to the heuristic rather than propagate.
+            # Logged rather than passed so a tokenizer outage is visible instead of
+            # silently degrading every count in the service.
+            logger.debug("Lexora tokenize failed, using heuristic: %s", exc)
         return len(text) // 4
 
     async def health_check(self) -> bool:
@@ -128,12 +136,13 @@ class LexoraClient(LLMClient):
             async with httpx.AsyncClient(timeout=5) as client:
                 response = await client.get(f"{self._base_url}/health")
                 return response.status_code == 200
-        except Exception:
+        except Exception:  # noqa: BLE001
+            # A health check that raises is a worse health check.
             return False
 
     async def get_model_capabilities(
         self, force_refresh: bool = False
-    ) -> Optional[ModelCapabilitiesCache]:
+    ) -> ModelCapabilitiesCache | None:
         """Fetch model capabilities from Lexora API.
 
         Args:
@@ -174,13 +183,14 @@ class LexoraClient(LLMClient):
                 )
                 return self._capabilities_cache
 
-        except Exception:
+        except Exception:  # noqa: BLE001
+            # Deliberately broad: stale capabilities beat no capabilities.
             # Return stale cache if available, otherwise None
             return self._capabilities_cache
 
     async def classify_task(
         self, task_description: str
-    ) -> Optional[ClassificationResult]:
+    ) -> ClassificationResult | None:
         """Classify a task to determine optimal model capability.
 
         Args:
@@ -205,10 +215,11 @@ class LexoraClient(LLMClient):
                     recommended_model=data.get("recommended_model"),
                 )
 
-        except Exception:
+        except Exception:  # noqa: BLE001
+            # Classification is advisory; failing it must not fail the call.
             return None
 
-    def find_model_for_capability(self, capability: str) -> Optional[str]:
+    def find_model_for_capability(self, capability: str) -> str | None:
         """Find a model with the specified capability from cache.
 
         Args:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -42,8 +42,8 @@ class LLMConfig(BaseModel):
 
     provider: LLMProvider = LLMProvider.MOCK
     model: str = "gpt-4o-mini"
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
+    api_key: str | None = None
+    base_url: str | None = None
     timeout: int = 30
     max_retries: int = 3
     # Model context window (input + output). Used to clamp requested output
@@ -95,7 +95,7 @@ class Settings(BaseSettings):
     summarization: SummarizationConfig = Field(default_factory=SummarizationConfig)
 
     @classmethod
-    def from_yaml(cls, path: Path) -> "Settings":
+    def from_yaml(cls, path: Path) -> Settings:
         """Load settings from YAML file. **config.yaml wins over the environment.**
 
         The precedence is the opposite of what this docstring used to
@@ -126,11 +126,14 @@ class Settings(BaseSettings):
         return cls()
 
     @classmethod
-    def for_testing(cls, **overrides) -> "Settings":
+    def for_testing(cls, **overrides: Any) -> Settings:
         """Create settings for testing with optional overrides."""
         from cognilens.config import LLMConfig, LLMProvider
 
-        defaults = {
+        # Annotated because the values are heterogeneous section objects;
+        # without it the dict narrows to dict[str, LLMConfig] and every
+        # other section looks like a type error at the call below.
+        defaults: dict[str, Any] = {
             "llm": LLMConfig(provider=LLMProvider.MOCK),
         }
         defaults.update(overrides)
@@ -138,7 +141,7 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-_settings: Optional[Settings] = None
+_settings: Settings | None = None
 
 
 def get_settings() -> Settings:

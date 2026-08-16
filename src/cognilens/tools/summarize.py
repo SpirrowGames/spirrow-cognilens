@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from cognilens.core.compressor import CompressionEngine
 
@@ -12,7 +12,7 @@ async def summarize(
     max_tokens: int = 500,
     style: Literal["concise", "detailed", "bullet"] = "concise",
     preserve: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Summarize text with specified style.
 
     Args:

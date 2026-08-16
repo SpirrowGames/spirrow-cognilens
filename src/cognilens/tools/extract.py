@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from cognilens.core.compressor import CompressionEngine
 
 
 async def extract_essence(
     document: str,
     focus_areas: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Extract essential information from a document.
 
     Args:

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
 
 from cognilens.core.types import CompressionRequest, CompressionResult, CompressionStyle
 from cognilens.prompts.builder import PromptBuilder
@@ -31,7 +30,7 @@ class CodeAwareStrategy(CompressionStrategy):
         return "Code-aware compression - preserves structure, compresses explanations"
 
     async def compress(
-        self, request: CompressionRequest, *, model: Optional[str] = None
+        self, request: CompressionRequest, *, model: str | None = None
     ) -> CompressionResult:
         """Compress text while preserving code structure."""
         original_tokens = await self.llm.count_tokens(request.text)

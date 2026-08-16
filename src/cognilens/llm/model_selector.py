@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cognilens.config import LLMConfig
 from cognilens.core.types import CompressionStyle
@@ -28,7 +28,7 @@ class ModelSelection:
 
     model_id: str
     method: SelectionMethod
-    capability: Optional[str] = None
+    capability: str | None = None
     confidence: float = 1.0
 
 
@@ -93,7 +93,7 @@ class ModelSelector:
     async def select_model(
         self,
         style: CompressionStyle,
-        content_preview: Optional[str] = None,
+        content_preview: str | None = None,
     ) -> ModelSelection:
         """Select the optimal model for a compression task.
 
@@ -159,7 +159,7 @@ class ModelSelector:
 
     async def _try_classification(
         self, content_preview: str
-    ) -> Optional[ModelSelection]:
+    ) -> ModelSelection | None:
         """Try to classify task using Lexora API.
 
         Args:
@@ -195,7 +195,7 @@ class ModelSelector:
 
     async def _try_capability_match(
         self, capability: str
-    ) -> Optional[ModelSelection]:
+    ) -> ModelSelection | None:
         """Try to find model with required capability from cache.
 
         Args:
@@ -219,7 +219,7 @@ class ModelSelector:
 
         return None
 
-    def _try_heuristic(self, content_preview: str) -> Optional[ModelSelection]:
+    def _try_heuristic(self, content_preview: str) -> ModelSelection | None:
         """Apply heuristic patterns to select model.
 
         Args:

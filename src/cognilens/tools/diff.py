@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from cognilens.core.compressor import CompressionEngine
 
 
@@ -9,7 +11,7 @@ async def summarize_diff(
     before: str,
     after: str,
     focus: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Summarize differences between two versions of text.
 
     Args:

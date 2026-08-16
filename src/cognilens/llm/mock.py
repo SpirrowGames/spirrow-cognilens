@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
 
 from .base import LLMClient, LLMResponse
 
@@ -18,10 +17,10 @@ class MockLLMClient(LLMClient):
         self,
         prompt: str,
         *,
-        system_prompt: Optional[str] = None,
-        max_tokens: Optional[int] = None,
+        system_prompt: str | None = None,
+        max_tokens: int | None = None,
         temperature: float = 0.7,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> LLMResponse:
         """Generate mock response by extracting key sentences."""
         self._call_count += 1

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from cognilens.config import LLMConfig, LLMProvider
 
 from .base import LLMClient, LLMResponse
@@ -34,7 +32,7 @@ def create_llm_client(config: LLMConfig) -> LLMClient:
 def create_model_selector(
     llm_client: LLMClient,
     config: LLMConfig,
-) -> Optional[ModelSelector]:
+) -> ModelSelector | None:
     """Factory function to create ModelSelector if applicable.
 
     Args:
@@ -55,22 +53,17 @@ def create_model_selector(
 
 
 __all__ = [
-    # Base classes
+    "ClassificationResult",
     "LLMClient",
     "LLMResponse",
-    # Client implementations
-    "MockLLMClient",
-    "OpenAIClient",
     "LexoraClient",
-    # Lexora data classes
-    "ModelCapability",
+    "MockLLMClient",
     "ModelCapabilitiesCache",
-    "ClassificationResult",
-    # Model selector
-    "ModelSelector",
+    "ModelCapability",
     "ModelSelection",
+    "ModelSelector",
+    "OpenAIClient",
     "SelectionMethod",
-    # Factory functions
     "create_llm_client",
     "create_model_selector",
 ]

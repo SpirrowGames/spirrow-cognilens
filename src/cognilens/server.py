@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from fastmcp import FastMCP
 
@@ -24,7 +24,7 @@ async def summarize(
     max_tokens: int = 500,
     style: Literal["concise", "detailed", "bullet"] = "concise",
     preserve: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Summarize text with specified style.
 
     Use this to reduce large text to key points while preserving essential information.
@@ -38,7 +38,7 @@ async def compress_context(
     full_context: str,
     task_description: str,
     target_tokens: int = 500,
-) -> dict:
+) -> dict[str, Any]:
     """Compress context for specific task execution.
 
     Optimizes context window usage by keeping only task-relevant information.
@@ -51,7 +51,7 @@ async def compress_context(
 async def extract_essence(
     document: str,
     focus_areas: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Extract essential information from a document.
 
     Identifies core concepts, key relationships, and critical specifications.
@@ -62,9 +62,9 @@ async def extract_essence(
 
 @mcp.tool
 async def unify_summaries(
-    documents: list[dict],
+    documents: list[dict[str, Any]],
     purpose: str,
-) -> dict:
+) -> dict[str, Any]:
     """Unify multiple documents into a single coherent summary.
 
     Combines multiple sources, removes redundancy, and highlights conflicts.
@@ -78,7 +78,7 @@ async def summarize_diff(
     before: str,
     after: str,
     focus: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Summarize differences between two versions of text.
 
     Highlights additions, deletions, and modifications.
@@ -90,8 +90,8 @@ async def summarize_diff(
 @mcp.tool
 async def progressive_compress(
     text: str,
-    stages: list[dict],
-) -> dict:
+    stages: list[dict[str, Any]],
+) -> dict[str, Any]:
     """Apply progressive compression through multiple stages.
 
     For very large documents, compress in stages to maintain quality.

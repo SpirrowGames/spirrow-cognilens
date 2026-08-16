@@ -26,19 +26,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Run linting
-        run: |
-          ruff check src/ tests/
-
-      - name: Run type checking
-        run: |
-          mypy src/ --ignore-missing-imports
-
+      # Tests first, and every step runs even if an earlier one failed.
+      # Previously lint came first and stopped the job, so a lint error
+      # meant the test step never executed -- main was red from
+      # 2026-04-13 and nobody could see that the suite itself was fine.
+      # A red build should say which things are broken, not just the
+      # first one.
       - name: Run tests
         run: |
           pytest tests/ -v --cov=cognilens --cov-report=xml
 
+      - name: Run linting
+        if: always()
+        run: |
+          ruff check src/ tests/
+
+      - name: Run type checking
+        if: always()
+        run: |
+          mypy src/ --ignore-missing-imports
+
       - name: Upload coverage
+        if: always()
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml

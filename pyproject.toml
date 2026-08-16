@@ -44,8 +44,16 @@ dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
     "pytest-cov>=4.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
+    # Pinned, not floated. CI resolves dependencies fresh on every run, so
+    # `ruff>=0.1.0` meant a new ruff release could turn the build red without
+    # anyone touching the code -- which is exactly what happened: 0.16.3
+    # enabled UP045/UP037 and main went red on rules that did not exist when
+    # it was written. Bumping these is now a deliberate commit.
+    "ruff==0.16.3",
+    "mypy==1.19.1",
+    # mypy needs these to type third-party calls; without them CI fails
+    # on `import yaml` alone.
+    "types-PyYAML>=6.0",
 ]
 
 [project.urls]
