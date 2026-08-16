@@ -96,11 +96,32 @@ class Settings(BaseSettings):
 
     @classmethod
     def from_yaml(cls, path: Path) -> "Settings":
-        """Load settings from YAML file, with environment variables taking precedence."""
+        """Load settings from YAML file. **config.yaml wins over the environment.**
+
+        The precedence is the opposite of what this docstring used to
+        claim, and of what the comment below it used to say. Passing the
+        YAML in as keyword arguments makes it *init* settings, and
+        pydantic-settings ranks init arguments above environment
+        variables -- so `COGNILENS_LLM__MODEL` in the environment is
+        read, ranked below `llm.model` in the file, and discarded.
+
+        Found while deploying: `start.sh` exported
+        `COGNILENS_LLM__MODEL=Qwen2.5-1.5B` and had no effect, while the
+        service ran on `light` from config.yaml. That was the right
+        model -- `light` is the Lexora backend whose declared
+        capabilities include summarization, and it resolves to Qwen3-32B
+        -- so the behaviour is kept and the description corrected. Had
+        it been "fixed" the other way, compression would have been
+        routed to a 1.5B model that Lexora no longer serves at all.
+
+        Anything that must be settable per host therefore belongs in
+        config.yaml, not in an exported variable.
+        """
         if path.exists():
             with open(path, encoding="utf-8") as f:
                 yaml_data = yaml.safe_load(f) or {}
-            # Create settings with YAML as defaults, env vars will override
+            # Init kwargs outrank env vars in pydantic-settings, so this
+            # line is what gives config.yaml the final say.
             return cls(**yaml_data)
         return cls()
 
