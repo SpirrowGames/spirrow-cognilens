@@ -134,11 +134,51 @@ async def test_openai_keeps_max_tokens_when_room_available(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_openai_clamp_never_returns_below_one(monkeypatch):
-    """Even when input alone exceeds the window, max_tokens stays >= 1."""
+async def test_openai_raises_when_input_leaves_no_budget(monkeypatch):
+    """Input that fills the window is an error, not a 1-token completion.
+
+    The previous behaviour clamped to a floor of 1 and returned a single
+    character that every layer above read as a successful summary.
+    """
+    from cognilens.llm.base import ContextWindowExceededError
+
     client, capture = _patched_openai_client(monkeypatch, context_window=1000, margin=256)
     prompt = "word " * 4000
 
-    await client.generate(prompt, max_tokens=500)
+    with pytest.raises(ContextWindowExceededError) as excinfo:
+        await client.generate(prompt, max_tokens=500)
 
-    assert capture.captured["max_tokens"] == 1
+    # The message has to carry the numbers, or the operator cannot tell
+    # "shorten the input" from "raise context_window".
+    assert excinfo.value.context_window == 1000
+    assert excinfo.value.safety_margin == 256
+    assert excinfo.value.input_tokens > 1000
+    assert "context_window=1000" in str(excinfo.value)
+    # Nothing was sent upstream: no GPU was spent producing a junk answer.
+    assert capture.captured == {}
+
+
+@pytest.mark.asyncio
+async def test_openai_allows_the_last_usable_token_of_budget(monkeypatch):
+    """A budget of exactly 1 token is tight, but it is not impossible.
+
+    Guards the boundary: the raise is on ``available <= 0``, so a window
+    leaving one token must still go upstream rather than raise.
+    """
+    client, capture = _patched_openai_client(monkeypatch, context_window=8192, margin=256)
+    prompt = "word " * 100
+    input_tokens = len(client._encoding.encode(prompt))
+
+    await client.generate(prompt, max_tokens=8192 - input_tokens - 256)
+
+    assert capture.captured["max_tokens"] == 8192 - input_tokens - 256
+
+
+@pytest.mark.asyncio
+async def test_openai_does_not_count_tokens_when_max_tokens_is_none(monkeypatch):
+    """No budget was requested, so there is nothing to clamp or refuse."""
+    client, capture = _patched_openai_client(monkeypatch, context_window=1000, margin=256)
+
+    await client.generate("word " * 4000)
+
+    assert capture.captured["max_tokens"] is None

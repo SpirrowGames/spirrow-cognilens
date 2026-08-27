@@ -7,7 +7,7 @@ from openai import AsyncOpenAI
 
 from cognilens.config import LLMConfig
 
-from .base import LLMClient, LLMResponse
+from .base import ContextWindowExceededError, LLMClient, LLMResponse
 
 
 class OpenAIClient(LLMClient):
@@ -48,6 +48,13 @@ class OpenAIClient(LLMClient):
         # model's context window. Callers compute max_tokens from the desired
         # summary size alone and ignore the input size, which makes the backend
         # reject the request (HTTP 400) once input + max_tokens > context window.
+        #
+        # When there is no budget left at all the request is impossible, and
+        # this raises rather than clamping to 1. Clamping was measured to
+        # return a single character that arrived at the caller looking like a
+        # successful summary: `finish_reason` is "length" either way, and no
+        # layer above can tell a 1-token completion from a terse one. Failing
+        # here converts a silent wrong answer into a loud one.
         if max_tokens is not None:
             input_tokens = len(self._encoding.encode(prompt))
             if system_prompt:
@@ -57,7 +64,14 @@ class OpenAIClient(LLMClient):
                 - input_tokens
                 - self.config.output_safety_margin
             )
-            max_tokens = max(1, min(max_tokens, available))
+            if available <= 0:
+                raise ContextWindowExceededError(
+                    input_tokens=input_tokens,
+                    context_window=self.config.context_window,
+                    safety_margin=self.config.output_safety_margin,
+                    model=use_model,
+                )
+            max_tokens = min(max_tokens, available)
 
         response = await self._client.chat.completions.create(
             model=use_model,

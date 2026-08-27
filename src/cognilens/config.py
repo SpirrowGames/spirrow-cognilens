@@ -48,7 +48,18 @@ class LLMConfig(BaseModel):
     max_retries: int = 3
     # Model context window (input + output). Used to clamp requested output
     # tokens so that input_tokens + max_tokens never exceeds the model limit.
-    context_window: int = 8192
+    #
+    # **This must track the serving backend, not this file.** It is not a
+    # policy knob: understating it silently shrinks the completion budget
+    # until `generate` has nothing left to ask for. The default matches the
+    # vLLM deployment Cognilens is pointed at; check it with
+    #   curl -s localhost:8110/v1/models | jq '.data[].max_model_len'
+    # and set `llm.context_window` in config.yaml whenever they differ.
+    #
+    # Was 8192 -- a leftover from the gpt-4o-mini default above -- while the
+    # backend served 32768. Inputs past ~7.9k tokens then left no budget and
+    # every summary of a long thread came back one token long.
+    context_window: int = 32768
     # Safety margin subtracted from the available output budget to absorb
     # chat-template overhead and tokenizer discrepancies between our local
     # token counter and the serving backend.
