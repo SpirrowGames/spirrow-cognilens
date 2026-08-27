@@ -13,6 +13,13 @@ llm:
   timeout: 30
   max_retries: 3
 
+  # 入力 + 出力の上限。**バックエンドの実値に追従させること**（ポリシーの
+  # つまみではない）。小さすぎると出力予算が黙って削られ、最終的に
+  # 「1 トークンだけの要約」が成功として返る。
+  #   curl -s localhost:8110/v1/models | jq '.data[].max_model_len'
+  # 現行 Lexora light = Qwen3.8-27B / max_model_len 32768。
+  context_window: 32768
+
   # Smart model selection (opt-in)
   # Enable to use Lexora's /v1/models/capabilities and /v1/classify-task APIs
   # for automatic model selection based on task type
