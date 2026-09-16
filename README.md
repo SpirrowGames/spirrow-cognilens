@@ -1,6 +1,6 @@
 # Spirrow-Cognilens
 
-**[日本語](README_ja.md)**
+**[日本語](README.ja.md)**
 
 Context compression and summarization MCP server for optimizing AI context windows.
 
