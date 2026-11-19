@@ -10,15 +10,22 @@ llm:
   base_url: "http://localhost:8110/v1"
   api_key: "dummy"  # Lexoraは認証不要
   model: "light"  # Lexoraティア名（軽量タスク向け）
-  timeout: 30
+  # 1 回の LLM 呼び出しの打ち切り。入力の長さから決める値:
+  # 実測 (2026-11-20、Qwen3.8-27B) で 90K token の入力は最初の 1 token までに
+  # 30 秒かかる ∴ 旧値 30 では長い入力が必ず切れる。120 = 90K 入力 + 出力 1500
+  # token (約 55 秒) の 2 倍。max_retries と掛け算で GPU を食うので、むやみに
+  # 上げない (呼び出し側の magickit は 150〜240 秒で待つのをやめる)。
+  timeout: 120
   max_retries: 3
 
   # 入力 + 出力の上限。**バックエンドの実値に追従させること**（ポリシーの
   # つまみではない）。小さすぎると出力予算が黙って削られ、最終的に
   # 「1 トークンだけの要約」が成功として返る。
   #   curl -s localhost:8110/v1/models | jq '.data[].max_model_len'
-  # 現行 Lexora light = Qwen3.8-27B / max_model_len 32768。
-  context_window: 32768
+  # 現行 Lexora light = Qwen3.8-27B / max_model_len 98304 (2026-11-20 に 32768 から拡大)。
+  # 入力の token 数は tiktoken (cl100k) で数えており、日本語では Qwen の実 token 数の
+  # 約 1.34 倍に出る (実測 0.744)。∴ この値いっぱいの日本語入力は実際には約 73K token。
+  context_window: 98304
 
   # Smart model selection (opt-in)
   # Enable to use Lexora's /v1/models/capabilities and /v1/classify-task APIs
